@@ -9,7 +9,7 @@ module.exports = {
       from: 'test@no-reply.com',
       subject: 'Blocipedia Account',
       html:
-        '<p style="font-size: 32px;">Thank you for signing up for Blocipedia! This email confirms your account was successfully created.</p>'
+        '<p style="font-size: 32px;">Thank you for signing up for Blocipedia! This email confirms your free account was successfully created.</p>'
     };
     sgMail.send(msg);
   }
