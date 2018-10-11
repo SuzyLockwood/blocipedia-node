@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../static/partials/head.ejs %>
+</head>
+
+<body>
+  <% include ../static/partials/navbar.ejs %>
+  <main class="container">
+    <% include ../static/partials/messages.ejs %>
+    <h1>
+      <%= `${user.username}'s profile` %>
+    </h1>
+    <h5>
+      <%= `Email: ${user.email}` %>
+    </h5>
+    <h5>
+      <%= `Membership Status: ${user.role}` %>
+    </h5>
+    <hr>
+
+    <% if(currentUser && currentUser.role == "standard") { %>
+    <h3>Upgrade to Premium Membership!</h3>
+    <small>For only $9.99 a month, get access to create private wikis!</small>
+
+    <!--
+Stripe Payment Test Credentials:
+Card Number: 4242 4242 4242 4242
+Exp Date: Any Date(MM/YY format)<
+CVC Number: Any 3 Digit Number
+Zip Code: Any 5 Digit Number
+-->
+
+    </ul>
+    <form action="/users/<%= currentUser.id %>/upgrade" method="POST">
+      <script src="https://checkout.stripe.com/checkout.js" class="stripe-button" data-key="pk_test_Yuj3qIdug9WYWpZ3eIrNIvmB"
+        data-amount="999" data-name="Blocipedia Stripe" data-description="Blocipedia Premium Membership Charge"
+        data-image="https://stripe.com/img/documentation/checkout/marketplace.png" data-locale="auto" data-zip-code="true">
+        </script>
+    </form>
+    <% } %>
+    <hr>
+    <% if(currentUser && currentUser.role == "premium") { %>
+    <form action="/users/<%= currentUser.id %>/downgrade" method="POST">
+      <button type="submit" class="btn btn-primary">Downgrade to Standard Membership</button>
+      <small>WARNING: Downgrading to Standard Membership will make all private wikis public.</small>
+    </form>
+
+    <% } %>
+
+  </main>
+  <% include ../static/partials/baseScripts.ejs %>
+</body>
+
+</html>
