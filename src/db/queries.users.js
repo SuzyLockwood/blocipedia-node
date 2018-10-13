@@ -1,3 +1,4 @@
+const Wiki = require('./models').Wiki;
 const User = require('./models').User;
 const bcrypt = require('bcryptjs');
 
@@ -20,27 +21,43 @@ module.exports = {
       });
   },
   getUser(id, callback) {
-    User.findById(id)
-      .then(user => {
-        callback(null, user);
-      })
-      .catch(err => {
-        callback(err);
-      });
-  },
-  updateUserRole(user, action) {
-    let newRole;
-    User.findOne({
-      where: { email: user.email }
-    }).then(user => {
-      if (action === 'upgrade') {
-        newRole = 'premium';
-      } else if (action === 'downgrade') {
-        newRole = 'standard';
+    let result = {};
+    User.findById(id).then(user => {
+      if (!user) {
+        callback(404);
+      } else {
+        result['user'] = user;
+
+        Wiki.scope({ method: ['userWikis', id] })
+          .all()
+          .then(wikis => {
+            result['wikis'] = wikis;
+
+            callback(null, result);
+          })
+          .catch(err => {
+            callback(err);
+          });
       }
-      user.update({
-        role: newRole
-      });
+    });
+  },
+  updateUserRole(id, newRole, callback) {
+    return User.findById(id).then(user => {
+      user
+        .update(
+          {
+            role: newRole
+          },
+          {
+            fields: ['role']
+          }
+        )
+        .then(user => {
+          callback(null, user);
+        })
+        .catch(err => {
+          callback(err);
+        });
     });
   }
 };

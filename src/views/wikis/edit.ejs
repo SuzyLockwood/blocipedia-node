@@ -10,17 +10,37 @@
 
     <main class="container">
 
+        <% include ../static/partials/messages.ejs %>
+
         <h1>Edit Wiki</h1>
         <form action="/wikis/<%= wiki.id %>/update" method="post">
             <div class="form-group">
-                <label for="title">Wiki title</label>
+                <label for="title">Wiki Title</label>
                 <input value="<%= wiki.title %>" type="text" class="form-control" name="title" aria-describedby="titleHelp"
-                    placeholder="Enter Title">
+                    placeholder="Enter Wiki Title">
+                <small class="text-muted" id="titleHelp">Title must be 2 or more characters in length.</small>
             </div>
             <div class="form-group">
-                <label for="body">Body</label>
-                <textarea rows="4" class="form-control" name="body" placeholder="Enter Body"><%= wiki.body %></textarea>
+                <label for="body">Wiki Content</label>
+                <textarea rows="4" class="form-control" name="body" placeholder="Enter Wiki Body"><%= wiki.body %></textarea>
+                <small class="text-muted" id="bodyHelp">Body must be 10 or more characters in length.</small>
             </div>
+            <% if(currentUser.role === 2 || (currentUser.role === 1 && (wiki.userId === currentUser.id))) { %>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="private" value="true" <%=wiki.private ? 'checked' :
+                    '' %>>
+                <label class="form-check-label" for="exampleRadios1">
+                    Private
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="private" value="false" <%=wiki.private ? '' :
+                    'checked' %>>
+                <label class="form-check-label" for="exampleRadios2">
+                    Public
+                </label>
+            </div>
+            <% } %>
             <button type="submit" class="btn btn-primary">Update</button>
         </form>
     </main>

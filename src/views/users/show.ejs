@@ -15,12 +15,9 @@
     <h5>
       <%= `Email: ${user.email}` %>
     </h5>
-    <h5>
-      <%= `Membership Status: ${user.role}` %>
-    </h5>
     <hr>
 
-    <% if(currentUser && currentUser.role == "standard") { %>
+    <% if(user.role === 0) { %>
     <h3>Upgrade to Premium Membership!</h3>
     <small>For only $9.99 a month, get access to create private wikis!</small>
 
@@ -33,21 +30,41 @@ Zip Code: Any 5 Digit Number
 -->
 
     </ul>
-    <form action="/users/<%= currentUser.id %>/upgrade" method="POST">
+    <form action="/users/<%= user.id %>/upgrade" method="POST">
       <script src="https://checkout.stripe.com/checkout.js" class="stripe-button" data-key="pk_test_Yuj3qIdug9WYWpZ3eIrNIvmB"
         data-amount="999" data-name="Blocipedia Stripe" data-description="Blocipedia Premium Membership Charge"
         data-image="https://stripe.com/img/documentation/checkout/marketplace.png" data-locale="auto" data-zip-code="true">
         </script>
     </form>
     <% } %>
-    <hr>
-    <% if(currentUser && currentUser.role == "premium") { %>
-    <form action="/users/<%= currentUser.id %>/downgrade" method="POST">
-      <button type="submit" class="btn btn-primary">Downgrade to Standard Membership</button>
-      <small>WARNING: Downgrading to Standard Membership will make all private wikis public.</small>
-    </form>
 
+    <% if(user.role === 1) { %>
+    <form action="/users/<%=  user.id %>/downgrade" method="POST">
+      <button type="submit" class="btn btn-primary">Downgrade to Standard Membership</button>
+      <p>
+        <small><strong>
+            <div style="color:red">WARNING:</div>
+          </strong> Downgrading to Standard Membership will make all private wikis public.</small>
+      </p>
+    </form>
     <% } %>
+
+    <hr>
+    <h2>Your Wikis</h2>
+    <ul class="list-group">
+      <% if(wikis) { %>
+      <% wikis.forEach((wiki) => { %>
+      <li>
+      <li class="list-group-item">
+        <a href="/wikis/<%= wiki.id %>">
+          <%= wiki.title %>
+        </a>
+        <span>[
+          <%= wiki.private ? 'private' : 'public' %>]</span>
+      </li>
+      <% }) %>
+      <% } %>
+    </ul>
 
   </main>
   <% include ../static/partials/baseScripts.ejs %>

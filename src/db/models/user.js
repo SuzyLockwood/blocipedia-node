@@ -20,8 +20,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       role: {
-        type: DataTypes.STRING,
-        defaultValue: 'standard'
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0 //standard
       }
     },
     {}
@@ -32,17 +33,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
       as: 'wikis'
     });
-  };
-  User.prototype.isStandard = function() {
-    return this.role === 'standard';
-  };
-
-  User.prototype.isPremium = function() {
-    return this.role === 'premium';
-  };
-
-  User.prototype.isAdmin = function() {
-    return this.role === 'admin';
   };
   return User;
 };

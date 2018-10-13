@@ -2,8 +2,10 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.addColumn('Users', 'role', Sequelize.STRING, {
-      defaultValue: 'standard'
+    return queryInterface.addColumn('Users', 'role', {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0
     });
   },
 

@@ -1,4 +1,3 @@
-// works using my email
 var sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 

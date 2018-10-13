@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       private: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false
+        defaultValue: false,
+        allowNull: false
       },
       userId: {
         type: DataTypes.INTEGER,
@@ -29,5 +30,12 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE'
     });
   };
+  //so that I can add wikis to user profile
+  Wiki.addScope('userWikis', userId => {
+    return {
+      where: { userId: userId },
+      order: [['createdAt', 'DESC']]
+    };
+  });
   return Wiki;
 };

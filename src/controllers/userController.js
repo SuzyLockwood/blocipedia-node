@@ -1,4 +1,5 @@
 const userQueries = require('../db/queries.users.js');
+const wikiQueries = require('../db/queries.wikis.js');
 const passport = require('passport');
 const emailConfirmation = require('../routes/api/email');
 const publicKey = 'pk_test_Yuj3qIdug9WYWpZ3eIrNIvmB';
@@ -23,7 +24,7 @@ module.exports = {
         res.redirect('/users/sign_up');
       } else {
         passport.authenticate('local')(req, res, () => {
-          req.flash('notice', "You've successfully signed up!");
+          req.flash('notice', 'You have successfully signed up!');
           emailConfirmation.sendEmail(newUser.email);
           res.redirect('/');
         });
@@ -39,23 +40,23 @@ module.exports = {
         req.flash('notice', 'Sign in failed. Please try again.');
         res.redirect('/users/sign_in');
       } else {
-        req.flash('notice', "You've successfully signed in!");
+        req.flash('notice', 'You have successfully signed in!');
         res.redirect('/');
       }
     });
   },
   signOut(req, res, next) {
     req.logout();
-    req.flash('notice', "You've successfully signed out!");
+    req.flash('notice', 'You have successfully signed out!');
     res.redirect('/');
   },
   show(req, res, next) {
-    userQueries.getUser(req.params.id, (err, user) => {
-      if (err || user === null) {
-        req.flash('notice', 'No user found with that ID');
+    userQueries.getUser(req.params.id, (err, result) => {
+      if (err || result.user === undefined) {
+        req.flash('notice', 'No user found with that ID.');
         res.redirect('/');
       } else {
-        res.render('users/show', { user });
+        res.render('users/show', { ...result });
       }
     });
   },
@@ -81,23 +82,47 @@ module.exports = {
       })
       .then(charge => {
         if (charge) {
-          let action = 'upgrade';
-          userQueries.updateUserRole(req.user, action);
-          req.flash('notice', 'Upgrade successful!');
-          res.redirect('/');
+          userQueries.updateUserRole(req.params.id, 1, (err, user) => {
+            if (err || user == null) {
+              console.log(err);
+              res.redirect(404, '/');
+            } else {
+              req.flash(
+                'notice',
+                'You have successfully upgraded to a Premium account!'
+              );
+              res.redirect('/');
+            }
+          });
         } else {
           req.flash('notice', 'Error upgrading. Please try again.');
           res.redirect(`users/${req.user.id}`);
         }
       });
   },
+
   downgradeForm(req, res, next) {
     res.render('users/downgrade', { publicKey });
   },
   downgrade(req, res, next) {
-    let action = 'downgrade';
-    userQueries.updateUserRole(req.user, action);
-    req.flash('notice', 'Downgrade successful!');
-    res.redirect(req.get('referer'));
+    userQueries.updateUserRole(req.params.id, 0, (err, user) => {
+      if (err || !user) {
+        res.redirect(404, '/');
+      } else {
+        res.redirect('/');
+      }
+    });
+    wikiQueries.updatePrivacy(req, (err, user) => {
+      if (err || user == null) {
+        req.flash('notice', 'Error downgrading. Please try again.');
+        res.redirect(err, '/');
+      } else {
+        req.flash(
+          'notice',
+          'You have successfully downgraded to a Standard account. All Private Wikis are now Public.'
+        );
+        res.redirect('/');
+      }
+    });
   }
 };

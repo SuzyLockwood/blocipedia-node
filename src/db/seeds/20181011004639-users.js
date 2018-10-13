@@ -10,7 +10,7 @@ for (let i = 1; i <= 10; i++) {
     password: faker.internet.password(),
     createdAt: new Date(),
     updatedAt: new Date(),
-    role: 'standard'
+    role: 0
   });
 }
 
