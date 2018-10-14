@@ -43,7 +43,7 @@ module.exports = {
     }
   },
   show(req, res, next) {
-    wikiQueries.getWiki(req.params.id, (err, wiki) => {
+    wikiQueries.getWiki(req, (err, wiki) => {
       if (err || wiki == null) {
         res.redirect(404, '/');
       } else {
@@ -63,7 +63,7 @@ module.exports = {
     });
   },
   edit(req, res, next) {
-    wikiQueries.getWiki(req.params.id, (err, wiki) => {
+    wikiQueries.getWiki(req, (err, wiki) => {
       if (err || wiki == null) {
         res.redirect(404, '/');
       } else {

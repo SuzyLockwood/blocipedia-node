@@ -1,6 +1,8 @@
 const Wiki = require('./models').Wiki;
 const User = require('./models').User;
+const Collaborator = require('./models').Collaborator;
 const bcrypt = require('bcryptjs');
+const Authorizer = require('../policies/application');
 
 module.exports = {
   createUser(newUser, callback) {
@@ -20,24 +22,51 @@ module.exports = {
         callback(err);
       });
   },
-  getUser(id, callback) {
+  getUser(req, callback) {
     let result = {};
-    User.findById(id).then(user => {
+    User.findById(req.params.id).then(user => {
       if (!user) {
         callback(404);
       } else {
         result['user'] = user;
-
-        Wiki.scope({ method: ['userWikis', id] })
-          .all()
-          .then(wikis => {
-            result['wikis'] = wikis;
-
-            callback(null, result);
+        if (req.user && (req.user.role === 2 || req.user.id === user.id)) {
+          Wiki.findAll({
+            where: {
+              userId: user.id
+            }
           })
-          .catch(err => {
-            callback(err);
-          });
+            .then(wikis => {
+              result['wikis'] = wikis;
+              Collaborator.scope({
+                method: ['collaboratorOn', user.id]
+              })
+                .all()
+                .then(collaborators => {
+                  result['collaborators'] = collaborators;
+                  callback(null, result);
+                })
+                .catch(err => {
+                  console.log(err);
+                  callback(err);
+                });
+            })
+            .catch(err => {
+              console.log(err);
+              callback(err);
+            });
+        } else {
+          Wiki.scope({ method: ['userWikisPublic', user.id] })
+            .all()
+            .then(wikis => {
+              result['wikis'] = wikis;
+              result['collaborators'] = [];
+              callback(null, result);
+            })
+            .catch(err => {
+              console.log(err);
+              callback(err);
+            });
+        }
       }
     });
   },

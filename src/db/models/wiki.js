@@ -29,11 +29,23 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
       onDelete: 'CASCADE'
     });
+    Wiki.hasMany(models.Collaborator, {
+      foreignKey: 'wikiId',
+      as: 'collaborators'
+    });
   };
-  //so that I can add wikis to user profile
-  Wiki.addScope('userWikis', userId => {
+  Wiki.addScope('wikisPublic', () => {
     return {
-      where: { userId: userId },
+      where: { private: false },
+      order: [['updatedAt', 'DESC']]
+    };
+  });
+  Wiki.addScope('userWikisPublic', userId => {
+    return {
+      where: {
+        userId: userId,
+        private: false
+      },
       order: [['createdAt', 'DESC']]
     };
   });

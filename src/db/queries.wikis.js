@@ -1,5 +1,6 @@
 const Wiki = require('./models').Wiki;
 const User = require('./models').User;
+const Collaborator = require('./models').Collaborator;
 const Authorizer = require('../policies/application');
 
 module.exports = {
@@ -19,11 +20,10 @@ module.exports = {
       });
   },
   getAllWikis(callback) {
-    return Wiki.all({
-      where: {
-        private: false
-      }
+    return Wiki.scope({
+      method: ['wikisPublic']
     })
+      .all()
       .then(wikis => {
         callback(null, wikis);
       })
@@ -31,10 +31,23 @@ module.exports = {
         callback(err);
       });
   },
-  getWiki(id, callback) {
-    return Wiki.findById(id)
+  getWiki(req, callback) {
+    return Wiki.findById(req.params.id, {
+      include: [
+        { model: Collaborator, as: 'collaborators', include: [{ model: User }] }
+      ]
+    })
       .then(wiki => {
-        callback(null, wiki);
+        if (!wiki) {
+          callback(404);
+        } else {
+          const authorized = new Authorizer(req.user, wiki).show();
+          if (!authorized) {
+            callback(403);
+          } else {
+            callback(null, wiki);
+          }
+        }
       })
       .catch(err => {
         callback(err);
